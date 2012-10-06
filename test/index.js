@@ -3,13 +3,13 @@
          forin: true globalstrict: true */
 'use strict';
 
-var daisy = require('../daisychain.js'),
-    getFunctionKeys = daisy.getFunctionKeys,
-    createMethodsHash = daisy.createMethodsHash,
-    uid = daisy.uid,
-    chain = daisy.chain,
-    box = daisy.box,
-    unbox = daisy.unbox;
+var choochoo = require('../choochoo.js'),
+    getFunctionKeys = choochoo.getFunctionKeys,
+    createMethodsHash = choochoo.createMethodsHash,
+    uid = choochoo.uid,
+    chain = choochoo.chain,
+    box = choochoo.box,
+    unbox = choochoo.unbox;
 
 var assert = require('assert');
 
