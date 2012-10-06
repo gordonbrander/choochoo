@@ -41,3 +41,27 @@ Show me
 
     var myEl = document.getElementById('my-el');
     DOMTrain(myEl).width(100).height(100);
+
+Ideas
+--------
+
+Deferred evaluation. Use ChooChoo as a DSL for creating composed functions,
+instead of evaluations.
+
+This might require a bit of a restructuring of the internals. I'm thinking:
+
+* Make the Box an array that keeps track of the list of evaluations to
+  be performed.
+* Box is an array of arrays. Each sub-array contains a function and
+  additional arguments.
+* Methods created from functions will push evaluation lists instead of
+  invoking the original function.
+* The returned function will cycle through the list of evaluations,
+  invoking them with the passed value + arguments passed to methods.
+* The return value of the evaluated function is automatically unboxed.
+
+Is this a common enough use case? It's true that evaluated chains of methods
+are not composable, but this is supposed to be a DSL -- a thin veneer over
+composable functions.
+
+Do we need to be able to compose compositions? Maybe.
