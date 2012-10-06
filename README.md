@@ -1,4 +1,4 @@
-Choochoo
+ChooChoo
 --------
 
 Compose functions using method chaining syntax.
@@ -17,7 +17,7 @@ Compose functions using method chaining syntax.
      ==+=/_|\ '' /~~\ '' /=+( o )( o )+==( o )( o )=+=( o )( o )+=
      '=='=='='--'==+='--'===+'-'=='-'==+=='-'+='-'===+='-'=='-'==+
 
-Choochoo creates "trains" of methods from objects full of lambda
+ChooChoo creates "trains" of methods from objects full of lambda
 functions, allowing you to compose the functions using method chaining.
 Think of it as **jQuery coding style for everything else**.
 
