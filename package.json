@@ -1,12 +1,11 @@
 {
-  "name": "Daisychain",
+  "name": "ChooChoo",
   "version": "0.0.1",
-  "description": "Create chainable method DSLs",
+  "description": "Compose functions using method chaining syntax",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --reporter spec"
   },
   "devDependencies": {
-    "mocha": ">= 1.6.0",
-    "expect.js": ">= 0.0.2"
+    "mocha": ">= 1.6.0"
   }
 }
