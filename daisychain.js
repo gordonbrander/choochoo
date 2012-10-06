@@ -82,6 +82,7 @@ function getFunctionKeys(hash) {
     return typeof(hash[key]) === 'function';
   });
 }
+exports.getFunctionKeys = getFunctionKeys;
 
 // Create a hash of daisychain method from a hash of lamda functions.
 // 
@@ -99,6 +100,7 @@ function createMethodsHash(hash) {
     return memo;
   }, {});
 }
+exports.createMethodsHash = createMethodsHash;
 
 // Create a new daisychain constructor from a hash of stateless functions.
 // Returns a factory function.
