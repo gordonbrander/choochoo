@@ -113,8 +113,8 @@ function chain(hash, construct) {
   // 
   // Example:
   // 
-  //     $daisy(value).foo().bar().baz();
-  return function $daisy(value) {
+  //     $train(value).foo().bar().baz();
+  return function $train(value) {
     var instance = create(methods);
     value = (construct || identity)(value);
     return box(instance, value);
