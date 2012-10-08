@@ -65,3 +65,20 @@ are not composable, but this is supposed to be a DSL -- a thin veneer over
 composable functions.
 
 Do we need to be able to compose compositions? Maybe.
+
+    $.foo().bar();
+    
+    function make$() {
+      var dsl = {};
+      function $$(value) {
+        return $$;
+      }
+      copyTo($$, dsl);
+    }
+
+Plan:
+
+* Queue evaluations (don't perform them).
+* Alternative function that queues evaluations into a composition.
+* In both cases, you get an `end()` method that is hard-bound to `choochoo`
+  instance. Calling it will perform all evaluations and return the unboxed value.
