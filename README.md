@@ -82,3 +82,5 @@ Plan:
 * Alternative function that queues evaluations into a composition.
 * In both cases, you get an `end()` method that is hard-bound to `choochoo`
   instance. Calling it will perform all evaluations and return the unboxed value.
+  Update: maybe not hard-bound, since doing this makes it difficult to construct
+  with other means (like `Object.create`).

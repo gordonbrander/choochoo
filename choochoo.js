@@ -121,3 +121,61 @@ function chain(hash, construct) {
   }
 }
 exports.chain = chain;
+
+// Creates a method that qill add instructions to the list of instructions
+// to be carried out.
+function createInstructorFrom(fn) {
+  // Return our method that adds a set of instructions to the list.
+  // Method is unbound, so it's up to you to assign it to an object.
+  return function instruct() {
+    // Turn arguments into a true array, then concatenate them to an array
+    // containing the function. This becomes our incomplete instruction set.
+    // It's waiting for a value-to-be-operated-on, to be complete.
+    // Push the result into our array-like object of instruction sets.
+    push(this, [fn].concat(slice(arguments)));
+
+    // Return this object so we may continue chaining.
+    return this;
+  }
+}
+
+// Compose a new ChooChoo. Will keep chaining evaluations until you call
+// `.end()` with a value, at which point it will carry them all out and
+// return the result. `.end()` is hard-bound, so you can pass it
+// around anywhere.
+//
+// var ChooChoo = build({ ... });
+// var value = ChooChoo().bar(1).baz(2).bing(3).end(4);
+function build(hash, constructor) {
+  // Create a prototypal copy of the hash passed.
+  var choochoo = create(hash);
+
+  function ChooChoo() {
+    // Enforce `new`.
+    if (!(this instanceof ChooChoo)) return new ChooChoo();
+    // Make ourselves arraylike, and insure we have at least one function
+    // to operate on. If you pass a constructor function, the value will be
+    // first passed to it (implicitly for every chain created).
+    push(this, [(constructor || identity)]);
+    return this;
+  }
+
+  // Create method form of `operate`.
+  function end(value) { return operate(this, value); }
+  choochoo.end = end;
+
+  // Create instruction versions of all functions.
+  choochoo = reduce(getFunctionKeys(hash), function (choochoo, key) {
+    // Capture the original function from the hash object which will become
+    // our prototype.
+    var lambda = hash[key];
+    // Create an instructor method from this lambda function. Assign it to our
+    // object (which will be our prototype).
+    choochoo[key] = createInstructorFrom(lambda);
+    return choochoo;
+  }, choochoo);
+
+  ChooChoo.prototype = choochoo;
+
+  return ChooChoo;
+}
