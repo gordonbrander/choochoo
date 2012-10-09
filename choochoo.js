@@ -122,21 +122,43 @@ function chain(hash, construct) {
 }
 exports.chain = chain;
 
+function addInstructions(choochoo, fn, additionalArguments) {
+  // This becomes our incomplete instruction set.
+  // It's waiting for a value-to-be-operated-on, to be complete.
+  // Push the result into our array-like object of instruction sets.
+  push(create(choochoo), [fn].concat(additionalArguments));
+  return choochoo;
+}
+
 // Creates a method that qill add instructions to the list of instructions
 // to be carried out.
 function createInstructorFrom(fn) {
   // Return our method that adds a set of instructions to the list.
   // Method is unbound, so it's up to you to assign it to an object.
   return function instruct() {
-    // Turn arguments into a true array, then concatenate them to an array
-    // containing the function. This becomes our incomplete instruction set.
-    // It's waiting for a value-to-be-operated-on, to be complete.
-    // Push the result into our array-like object of instruction sets.
-    push(this, [fn].concat(slice(arguments)));
-
     // Return this object so we may continue chaining.
-    return this;
+    return addInstructions(this, fn, slice(arguments));
   }
+}
+
+// Run a ChooChoo, returning the result.
+// If you want to take the OO approach, use `run` method instead.
+function run(choochoo, value) {
+  
+}
+
+// Convert a ChooChoo object into a stateless composed function made up
+// of all it's chaining.
+function asFunction(choochoo) {
+  return function(value) { run(choochoo, value); };
+}
+
+function runWrappedInMethod(value) {
+  return run(this, value);
+}
+
+function addInstrunctionsWrappedInMethod(fn) {
+  return addInstructions(this, fn, slice(arguments, 1));
 }
 
 // Compose a new ChooChoo. Will keep chaining evaluations until you call
@@ -144,28 +166,27 @@ function createInstructorFrom(fn) {
 // return the result. `.end()` is hard-bound, so you can pass it
 // around anywhere.
 //
-// var ChooChoo = build({ ... });
-// var value = ChooChoo().bar(1).baz(2).bing(3).end(4);
+// var value = build({ ... }).bar(1).and(baz, 2).bing(3).run(4);
 function build(hash, constructor) {
   // Create a prototypal copy of the hash passed.
   var choochoo = create(hash);
 
-  function ChooChoo() {
-    // Enforce `new`.
-    if (!(this instanceof ChooChoo)) return new ChooChoo();
-    // Make ourselves arraylike, and insure we have at least one function
-    // to operate on. If you pass a constructor function, the value will be
-    // first passed to it (implicitly for every chain created).
-    push(this, [(constructor || identity)]);
-    return this;
-  }
+  // Make ourselves arraylike, and insure we have at least one function
+  // to operate on. If you pass a constructor function, the value will be
+  // first passed to it (implicitly for every chain created).
+  constructor = constructor || identity;
+  push(this, [constructor]);
 
   // Create method form of `operate`.
-  function end(value) { return operate(this, value); }
-  choochoo.end = end;
+  choochoo.run = runWrappedInMethod;
+
+  // Ad-hoc chaining of functions and arguments.
+  choochoo.and = addInstructionsWrappedInMethod;
 
   // Create instruction versions of all functions.
-  choochoo = reduce(getFunctionKeys(hash), function (choochoo, key) {
+  // Your methods will overwrite `run` and `and` if there is a naming collision.
+  // You can use the functional equivalents if this happens.
+  return reduce(getFunctionKeys(hash), function (choochoo, key) {
     // Capture the original function from the hash object which will become
     // our prototype.
     var lambda = hash[key];
@@ -174,8 +195,4 @@ function build(hash, constructor) {
     choochoo[key] = createInstructorFrom(lambda);
     return choochoo;
   }, choochoo);
-
-  ChooChoo.prototype = choochoo;
-
-  return ChooChoo;
 }
