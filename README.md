@@ -42,6 +42,10 @@ Show me
     var myEl = document.getElementById('my-el');
     DOMTrain(myEl).width(100).height(100);
 
+    // You can create trains directly from modules, too!
+    var MTrain = choochoo.train(require('mymodule'));
+    MTrain('source').convert().transform();
+
 Ideas
 --------
 
