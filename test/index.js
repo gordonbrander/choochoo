@@ -9,7 +9,8 @@ var choochoo = require('../choochoo.js'),
     uid = choochoo.uid,
     chain = choochoo.chain,
     box = choochoo.box,
-    unbox = choochoo.unbox;
+    unbox = choochoo.unbox,
+    lambda = choochoo.lambda;
 
 var assert = require('assert');
 
@@ -43,6 +44,28 @@ describe('uid', function () {
 
     // Good enough. Random and longish.
     assert.ok(uid1.length > 5);
+  });
+});
+
+describe('lambda', function () {
+  var x = {
+    state: 2,
+    m: function () {
+      return this.state;
+    }
+  };
+
+  var xlike = { state: 3 };
+
+  var l = lambda(x.m);
+
+  it('returns a function', function () {
+    assertType(l, 'function');
+  });
+
+  it('uses the first argument of that function as the "this" context of the wrapped method', function () {
+    assert.equal(l(x), 2);
+    assert.equal(l(xlike), 3);
   });
 });
 
