@@ -89,6 +89,7 @@ function dsl(hash) {
   }
   Train.prototype.value = execute
   Train.prototype.valueOf = execute
+  Train.prototype.run = execute
 
   // Convert all the stateless functions from hash into methods and store them
   // under prototype for our daisychains.

@@ -91,7 +91,7 @@ var dom = dsl({
 });
 
 var myEl = document.getElementById('my-el');
-DOMTrain(myEl).width(100).height(100);
+DOMTrain(myEl).width(100).height(100).run();
 
 // You can create trains directly from modules, too!
 var MTrain = choochoo.train(require('mymodule'));
