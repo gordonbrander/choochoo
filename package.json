@@ -1,6 +1,6 @@
 {
   "name": "ChooChoo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Compose functions using method chaining syntax",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --reporter spec"

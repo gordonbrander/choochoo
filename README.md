@@ -1,7 +1,7 @@
 ChooChoo
 --------
 
-Compose functions using method chaining syntax.
+Create small and lazy DSLs using method chaining syntax.
 
                       .---._
                   .--(. '  .).--.      . .-.
@@ -21,51 +21,79 @@ ChooChoo creates "trains" of methods from objects full of lambda
 functions, allowing you to compose the functions using method chaining.
 Think of it as **jQuery coding style for everything else**.
 
-What is a lambda function? Anthing function that's not a method. Lambdas are
-functions without side effects. They take value and return a result, without
-referencing `this`.
+What is a lambda function? Any function that does not refers to `this`
+pseudo-variable. Ideally lambdas are side-effect free. They take input
+and compute output without changing / mutating anything that is not
+created with in them.
 
 Show me
 -------
 
-    var DOMTrain = choochoo.train({
-      width: function (element, width) {
-        element.width = width;
-        return element;
-      },
-      height: function (element, height) {
-        element.height = height;
-        return element;
-      }
-    });
+```js
+// Define our lambda functions
 
-    var myEl = document.getElementById('my-el');
-    DOMTrain(myEl).width(100).height(100);
+function descriptor(source) {
+  return Object.getOwnPropertyNames(source).reduce(function(result, name) {
+    result[name] = Object.getOwnPropertyDescriptor(source, name)
+    return result
+  }, {})
+}
 
-    // You can create trains directly from modules, too!
-    var MTrain = choochoo.train(require('mymodule'));
-    MTrain('source').convert().transform();
+function merge() {
+  var sources = Array.prototype.slice.call(arguments)
+  var target = sources.shift()
+  var whitelist = {}
+  sources.forEach(function(source) {
+    var properties = descriptor(source)
+    Object.keys(properties).forEach(function(name) {
+      whitelist[name] = properties[name]
+    })
+  })
+  return Object.defineProperties(target, whitelist)
+}
 
-Ideas
---------
+function pick() {
+  var names = Array.prototype.slice.call(arguments)
+  var source = names.shift()
+  var properties = descriptor(source)
+  var whitelist = {}
+  names.forEach(function(name) {
+    whitelist[name] = properties[name]
+  })
+  return Object.create(Object.getPrototypeOf(source), whitelist)
+}
 
-Deferred evaluation. Use ChooChoo as a DSL for creating composed functions,
-instead of evaluations.
+var dsl = require("choochoo")
+var hash = dsl({ descriptor: descriptor, pick: pick, merge: merge })
 
-This might require a bit of a restructuring of the internals. I'm thinking:
+hash({ a: 1, b: 2, c: 3, d: 4 }).
+  merge({ x: 12, y: 13 }).
+  pick('a', 'b', 'x').
+  value() // => { x: 12, a: 1, b: 2 }
+```
 
-* Make the Box an array that keeps track of the list of evaluations to
-  be performed.
-* Box is an array of arrays. Each sub-array contains a function and
-  additional arguments.
-* Methods created from functions will push evaluation lists instead of
-  invoking the original function.
-* The returned function will cycle through the list of evaluations,
-  invoking them with the passed value + arguments passed to methods.
-* The return value of the evaluated function is automatically unboxed.
+But hey, DOM is full of side effects and pure functions can't really work, so
+feel free to take impure functions onboard:
 
-Is this a common enough use case? It's true that evaluated chains of methods
-are not composable, but this is supposed to be a DSL -- a thin veneer over
-composable functions.
+Show me
+-------
 
-Do we need to be able to compose compositions? Maybe.
+```js
+var dom = dsl({
+  width: function (element, width) {
+    element.width = width;
+    return element;
+  },
+  height: function (element, height) {
+    element.height = height;
+    return element;
+  }
+});
+
+var myEl = document.getElementById('my-el');
+DOMTrain(myEl).width(100).height(100);
+
+// You can create trains directly from modules, too!
+var MTrain = choochoo.train(require('mymodule'));
+MTrain('source').convert().transform();
+```

@@ -1,17 +1,10 @@
 /* vim:set ts=2 sw=2 sts=2 expandtab */
-/*jshint es5: true node: true browser: true devel: true
+/*jshint asi: true es5: true node: true browser: true devel: true
          forin: true globalstrict: true */
 'use strict';
 
-var choochoo = require('../choochoo.js'),
-    getFunctionKeys = choochoo.getFunctionKeys,
-    createMethodsHash = choochoo.createMethodsHash,
-    uid = choochoo.uid,
-    chain = choochoo.chain,
-    box = choochoo.box,
-    unbox = choochoo.unbox;
-
-var assert = require('assert');
+var dsl = require('../choochoo')
+var assert = require('assert')
 
 var getPrototypeOf = Object.getPrototypeOf;
 
@@ -27,76 +20,14 @@ function isA(x, y) {
   return function () { assertType(x, y); }
 }
 
-describe('uid', function () {
-  it('returns a value that may be used as a key', isA(uid(), 'string'));
-  
-  it('does not return the same value twice', function () {
-    var uid1 = uid();
-    var uid2 = uid();
-    
-    // Good enough. This isn't exactly rocket science.
-    assert.ok(uid1 != uid2);
-  });
-
-  it('is unlikely to collide with other keys', function () {
-    var uid1 = uid();
-
-    // Good enough. Random and longish.
-    assert.ok(uid1.length > 5);
-  });
-});
-
-describe('getFunctionKeys', function () {
-  it('is a function', isA(getFunctionKeys, 'function'));
-
-  var mixedHash = {
-    'identity': function (thing) {
-      return thing;
-    },
-    'state1': true,
-    'state2': false,
-    'allowedStates': [ 'state1', 'state2' ]
-  };
-
-  it('returns an array keys that map to functions on the passed object', function () {
-    var fnKeys = getFunctionKeys(mixedHash);
-
-    fnKeys.forEach(function(key) {
-      assertType(mixedHash[key], 'function');
-    });
-  });
-});
-
-describe('createMethodsHash', function () {
-  it('is a function', isA(createMethodsHash, 'function'));
-
-  var mixedHash = {
-    'identity': function (thing) {
-      return thing;
-    },
-    'state1': true,
-    'state2': false,
-    'allowedStates': [ 'state1', 'state2' ]
-  };
-
-  it('returns an object that contains lifted versions of the functions in the passed object, at the same keys', function () {
-    var methodsHash = createMethodsHash(mixedHash);
-
-  });
-
-  it('returns a new object (does not mutate the original)', function () {
-    var methodsHash = createMethodsHash(mixedHash);
-    assert.notEqual(methodsHash, mixedHash);
-  });
-});
-
-describe('chain', function () {
-  it('is a function', isA(chain, 'function'));
-  it('returns a function', isA(chain({}), 'function'));
+describe('module exports', function () {
+  it('is a function', isA(dsl, 'function'));
+  it('returns a function', isA(dsl({}), 'function'));
+  it('contains lift utility', isA(dsl.lift, 'function'));
 });
 
 describe('constructor returned by chain', function () {
-  var $ = chain({
+  var $ = dsl({
     'identity': function (thing) {
       return thing;
     },
@@ -109,6 +40,12 @@ describe('constructor returned by chain', function () {
 
   it('returns an object', function () {
     assertType($(2), 'object');
+  });
+
+  it('contains predefined methods', function () {
+    var chain = dsl({})
+    assertType(chain().value, 'function')
+    assertType(chain().valueOf, 'function')
   });
 
   it('constructs and returns a new object every time', function () {
@@ -126,8 +63,18 @@ describe('constructor returned by chain', function () {
     $(10).x(10).x(10).mod(3);
   });
 
-  it("updates it's state with the return value of the original unlifted function", function () {
-    assert.equal(unbox($(10).x(10).x(10)), 1000);
-    assert.equal(unbox($(10).x(3).mod(3)), 0);
+  it('methods return object representing new state', function () {
+     assertType($(10), "object");
+     assertType($(10).x(10), "object");
+     assertType($(10).x(10).x(10).mod(3), "object");
+  });
+
+  it("value method calculates computation", function () {
+    assert.equal($(10).x(10).x(10).value(), 1000);
+    assert.equal($(10).x(3).mod(3).value(), 0);
+  });
+
+  it("type conversion forces value calculation", function () {
+    assert.equal($(10).x(10).x(10) + 1, 1001);
   });
 });
